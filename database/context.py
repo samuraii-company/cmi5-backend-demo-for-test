@@ -9,7 +9,6 @@ if TYPE_CHECKING:
 
 @dataclass(frozen=True)
 class ContextData:
-    user: Optional["User"]
     db_session: Optional["DBSession"]
 
 

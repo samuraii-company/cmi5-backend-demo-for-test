@@ -15,7 +15,7 @@ async def create_user(
     data: UserCreate,
     user_service: UserService = Depends(UserService),
 ):
-    """Создать нового пользователя"""
+    """Create a new user"""
 
     user = await user_service.get_by_email(data.email)
 
@@ -24,18 +24,18 @@ async def create_user(
 
     user = await user_service.create(data.dict())
 
-    return UserRead.from_orm(user)
+    return user
 
 
 @users_router.get("", response_model=list[UserRead])
 async def create_user(
     user_service: UserService = Depends(UserService),
 ):
-    """Получить список всех пользователей"""
+    """Get all not deleted users"""
 
     users = await user_service.get_all()
 
-    return [UserRead.from_orm(user) for user in users]
+    return users
 
 
 @users_router.get("/email/{email}", response_model=UserRead)
@@ -43,11 +43,11 @@ async def get_by_email(
     email: str,
     user_service: UserService = Depends(UserService),
 ):
-    """Получить список всех пользователей"""
+    """Get user by email"""
 
     user = await user_service.get_by_email(email)
 
     if not user:
         raise HTTPException(detail="Юзера нет", status_code=404)
 
-    return UserRead.from_orm(user)
+    return user

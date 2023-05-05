@@ -7,10 +7,7 @@ from database.context import ContextData, request_context
 
 class ContextMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next) -> Response:
-        context_data = ContextData(
-            user=None,
-            db_session=request.state.db_session,
-        )
+        context_data = ContextData(db_session=request.state.db_session)
         ctx_token = request_context.set(context_data)
         request.state.context = request_context
         response = await call_next(request)
