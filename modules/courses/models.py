@@ -1,11 +1,13 @@
 import datetime
 from uuid import UUID, uuid4
+
 from sqlalchemy import Column, DateTime, ForeignKey, String
 from sqlalchemy.dialects import postgresql
-from database.db import Base
 from sqlalchemy.orm import relationship
-from modules.users.models import User
+
+from database.db import Base
 from modules.statements.models import CMIStatement
+from modules.users.models import User
 
 
 class CMICourse(Base):
@@ -17,8 +19,6 @@ class CMICourse(Base):
         default=uuid4,
         index=True,
     )
-    email: Column[str] = Column("email", String)
-    password: Column[str] = Column("password", postgresql.VARCHAR, default="")
     title: Column[str] = Column("title", String)
     description: Column[str] = Column("description", String)
     organization_id: Column[UUID] = Column(  # FAKE FIELD

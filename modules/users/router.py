@@ -1,11 +1,9 @@
-from fastapi import (
-    APIRouter,
-    Depends,
-    HTTPException,
-)
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, HTTPException, Response
+
 from modules.users.schema import UserCreate, UserRead
 from modules.users.services import UserService
-
 
 users_router = APIRouter(tags=["users"], prefix="/api/users")
 
@@ -20,7 +18,7 @@ async def create_user(
     user = await user_service.get_by_email(data.email)
 
     if user:
-        raise HTTPException(detail="Пользователь уже есть", status_code=400)
+        raise HTTPException(detail="User already exist", status_code=400)
 
     user = await user_service.create(data.dict())
 
@@ -28,7 +26,7 @@ async def create_user(
 
 
 @users_router.get("", response_model=list[UserRead])
-async def create_user(
+async def get_all_users(
     user_service: UserService = Depends(UserService),
 ):
     """Get all not deleted users"""
@@ -48,6 +46,23 @@ async def get_by_email(
     user = await user_service.get_by_email(email)
 
     if not user:
-        raise HTTPException(detail="Юзера нет", status_code=404)
+        raise HTTPException(detail="User not found", status_code=404)
 
     return user
+
+
+@users_router.delete("{user_id}", response_model=UserRead)
+async def delete_user(
+    user_id: UUID,
+    user_service: UserService = Depends(UserService),
+):
+    """Delete user by user id"""
+
+    user = await user_service.get_by_id(user_id)
+
+    if not user:
+        raise HTTPException(detail="User not found", status_code=404)
+
+    await user_service.delete(user)
+
+    return Response(status_code=204)

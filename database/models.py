@@ -1,3 +1,3 @@
-from modules.courses.models import *
-from modules.users.models import *
-from modules.statements.models import *
+from modules.courses.models import *  # noqa
+from modules.statements.models import *  # noqa
+from modules.users.models import *  # noqa

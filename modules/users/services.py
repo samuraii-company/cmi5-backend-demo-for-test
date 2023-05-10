@@ -1,9 +1,13 @@
-from uuid import uuid4
+import datetime
+from uuid import UUID, uuid4
+
 from fastapi import Depends
-from sqlalchemy import and_, select
+from sqlalchemy import and_, select, update
+
 from database.db import DBSession
-from database.session import get_session, provide_session
+from database.session import get_session
 from modules.users.models import User
+
 from .utils import get_password_hash
 
 
@@ -18,7 +22,6 @@ class UserService:
             id=uuid4(),
             email=data.get("email"),
             password=get_password_hash(data.get("password")),
-            # organization_id="ebbc58b4db644e93bdfbe493534e847c",  # FAKE FIELD DATA
         )
 
         self.session.add(user)
@@ -29,12 +32,29 @@ class UserService:
         user = (
             await self.session.execute(
                 select(self.model).where(
-                    and_(self.model.email == email, self.model.deleted_at.is_(None))
+                    and_(
+                        self.model.email == email,
+                        self.model.deleted_at.is_(None),
+                    )
                 )
             )
         ).scalar()
 
         return user
+
+    async def delete(self, user: User) -> None:
+        query = (
+            update(self.model)
+            .where(
+                and_(
+                    self.model.deleted_at.is_(None),
+                    self.model.id == user.id,
+                )
+            )
+            .values(deleted_at=datetime.datetime.utcnow())
+        )
+
+        await self.session.execute(query)
 
     async def get_all(self) -> list[User | None]:
         user = (
@@ -46,5 +66,19 @@ class UserService:
             .scalars()
             .all()
         )
+
+        return user
+
+    async def get_by_id(self, user_id: UUID) -> User | None:
+        user = (
+            await self.session.execute(
+                select(self.model).where(
+                    and_(
+                        self.model.id == user_id,
+                        self.model.deleted_at.is_(None),
+                    )
+                )
+            )
+        ).scalar()
 
         return user

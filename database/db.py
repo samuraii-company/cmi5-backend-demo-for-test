@@ -1,12 +1,12 @@
 import json
-from typing import NewType, Any
 from dataclasses import dataclass
+from typing import Any, NewType
 from uuid import UUID
+
 from sqlalchemy import MetaData
-from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine, AsyncSession
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.pool.impl import AsyncAdaptedQueuePool
-
 
 DBSession = NewType("DBSession", AsyncSession)
 

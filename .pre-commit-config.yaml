@@ -1,0 +1,25 @@
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.0.1
+    hooks:
+    -   id: check-merge-conflict
+    -   id: detect-private-key
+    -   id: end-of-file-fixer
+    -   id: trailing-whitespace
+-   repo: https://github.com/asottile/yesqa
+    rev: v1.2.3
+    hooks:
+    -   id: yesqa
+-   repo: https://github.com/psf/black
+    rev: 22.3.0
+    hooks:
+    -   id: black
+        exclude: ^.*\b(migrations)\b.*$
+        language_version: '3.11'
+        args: ['--skip-string-normalization']
+-   repo: https://github.com/pycqa/flake8
+    rev: '3.9.2'
+    hooks:
+    -   id: flake8
+        language_version: '3.11'
+        exclude: ^.*\b(alembic)\b.*$

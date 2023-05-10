@@ -7,7 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_scoped_session
 from sqlalchemy.orm import sessionmaker
 
 from database.context import ContextData, get_context
-from .db import engine, DBSession
+
+from .db import DBSession, engine
 
 
 async def _get_session():
