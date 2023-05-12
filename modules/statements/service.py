@@ -88,7 +88,6 @@ class CMIStatementService:
     async def get_full_objs(
         self, statements: CMIStatement
     ) -> list[CMIEnrollment | None]:
-        await self.session.commit()
         objs = (
             (
                 await self.session.execute(

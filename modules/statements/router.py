@@ -3,6 +3,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from modules.courses.service import CMICourseService
 from modules.statements.schema import CMIStatementRead, CMIStatementsCreate
 from modules.statements.service import CMIStatementService
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 statement_router = APIRouter(tags=["statement"], prefix="/api/statement")
 
@@ -47,10 +51,9 @@ async def get_all_statements(
     """Get all statements"""
 
     statements = await cmi_statement_service.get_all()
-
     if not statements:
         raise HTTPException(detail="Statements not found", status_code=404)
 
     objs = await cmi_statement_service.get_full_objs(statements)
-
+    logger.info(objs)
     return objs
