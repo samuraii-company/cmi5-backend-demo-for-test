@@ -5,6 +5,11 @@
 docker compose up -d --build
 ```
 
+Дока
+```
+http://0.0.0.0:5000/docs
+```
+
 Структура моделей
 ```
 class User(Base):
