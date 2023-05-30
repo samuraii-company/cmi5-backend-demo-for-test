@@ -91,12 +91,12 @@ async def set_enrollment(
     course = await cmi_course_service.get_by_id(data.course_id)
 
     if not course:
-        raise HTTPException("Курс не найден", status_code=404)
+        raise HTTPException(detail="Курс не найден", status_code=404)
 
     user = await user_service.get_by_id(data.user_id)
 
     if not user:
-        raise HTTPException("Пользователь не найден", status_code=404)
+        raise HTTPException(detail="Пользователь не найден", status_code=404)
 
     enrollment = await cmi_course_service.get_enrollment(course.id, user.id)
 

@@ -30,7 +30,7 @@ class IStorage(Protocol):
         ...
 
 
-class LocalStorage(IStorage):
+class LocalStorage:
     def __init__(self):
         self._bucket_name = settings.s3_settings.bucket_name
         self.minio = self.__set_connection()

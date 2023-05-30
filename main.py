@@ -19,7 +19,7 @@ app.include_router(statement_router)
 
 
 @app.post("/", response_class=JSONResponse)
-async def root() -> dict:
+async def root() -> JSONResponse:
     """Тестовый ендпоинт"""
 
     return JSONResponse(content={"ok": True}, status_code=200)
