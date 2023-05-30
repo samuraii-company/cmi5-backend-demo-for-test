@@ -29,3 +29,5 @@ archive.zip
 !images/.gitkeep
 db.sqlite3
 docker-compose.dev.yml
+
+s3data/

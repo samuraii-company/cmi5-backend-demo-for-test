@@ -3,12 +3,23 @@ from uuid import UUID
 import pydantic
 
 from modules.users.schema import UserRead
+from settings.config import settings
+from shared.utils import urljoin
 
 
 class CMICoursesBase(pydantic.BaseModel):
     id: UUID
     title: str
     description: str
+    file_link: str | None
+
+    @pydantic.validator("file_link")
+    def validate_link(cls, v) -> str | None:
+        if v and not v.startswith(
+            urljoin(settings.storage_url, settings.s3_settings.bucket_name)
+        ):
+            return urljoin(settings.storage_url, settings.s3_settings.bucket_name, v)
+        return v
 
     class Config:
         orm_mode = True
@@ -17,11 +28,6 @@ class CMICoursesBase(pydantic.BaseModel):
 class CMICourseRead(CMICoursesBase):
     id: UUID
     users: list[UserRead | None] = pydantic.Field(default=[])
-
-
-class CMICourseCreate(pydantic.BaseModel):
-    title: str
-    description: str
 
 
 class CMIEnrollementCreate(pydantic.BaseModel):

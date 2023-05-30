@@ -25,6 +25,7 @@ class CMICourse(Base):
         postgresql.UUID(as_uuid=True),
         nullable=False,
     )
+    file_link: Column[str] = Column("file_link", String, nullable=True)
     deleted_at: Column[datetime.datetime] = Column(DateTime)
 
 

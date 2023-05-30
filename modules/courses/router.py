@@ -1,16 +1,20 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends, File, HTTPException, UploadFile
 
 from modules.courses.schema import (
-    CMICourseCreate,
     CMICourseRead,
     CMICoursesBase,
     CMIEnrollementCreate,
     CMIEnrollementRead,
 )
-from modules.courses.service import CMICourseService
+from modules.courses.service import CMICourseService, CourseDTO
 from modules.users.services import UserService
+import logging
+from storage.storage import IStorage, LocalStorage
+
+
+logger = logging.getLogger(__name__)
 
 courses_router = APIRouter(tags=["courses"], prefix="/api/courses")
 
@@ -20,15 +24,20 @@ courses_router = APIRouter(tags=["courses"], prefix="/api/courses")
     response_model=CMICourseRead,
 )
 async def create_cmi5_course(
-    data: CMICourseCreate,
+    title: str = Body(..., description="Course Title"),
+    description: str = Body(..., description="Course Description"),
+    file: UploadFile = File(...),
     cmi_course_service: CMICourseService = Depends(CMICourseService),
+    storage: IStorage = Depends(LocalStorage),
 ):
     """Create CMI5 Course"""
 
-    data = dict(
-        title=data.title,
-        description=data.description,
-    )
+    if file.content_type not in ("application/zip", "application/octet-stream"):
+        raise HTTPException(detail="upload zip archive", status_code=400)
+
+    file_path = storage.save_course_file(file)
+
+    data = CourseDTO(title=title, description=description, file_path=file_path)
 
     course = await cmi_course_service.create(data)
 
@@ -98,5 +107,4 @@ async def set_enrollment(
         )
 
     enrollment = await cmi_course_service.set_enrollment(course, user)
-
     return enrollment
