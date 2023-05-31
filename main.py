@@ -1,22 +1,27 @@
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse
 
 from middlewares import register_middlewares
 from modules.courses.router import courses_router
 from modules.statements.router import statement_router
 from modules.users.router import users_router
+import logging
+from app import __version__
 
-app = FastAPI(title="Secure-t CMI5 Backend API", version="0.1.0")
-
-app = register_middlewares(app)
-
-app.include_router(users_router)
-app.include_router(courses_router)
-app.include_router(statement_router)
+logger = logging.getLogger(__name__)
 
 
-@app.post("/", response_class=JSONResponse)
-async def root(data: dict) -> dict:
-    """Тестовый ендпоинт, что сюда отправишь то и отдаст обратно"""
+def create_app() -> FastAPI:
+    app: FastAPI = FastAPI(
+        title="Secure-t CMI5 Backend API",
+        version=__version__,
+    )
 
-    return JSONResponse(content=data, status_code=200)
+    app.include_router(users_router)
+    app.include_router(courses_router)
+    app.include_router(statement_router)
+    app = register_middlewares(app)
+
+    return app
+
+
+app = create_app()

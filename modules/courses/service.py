@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import datetime
 from uuid import UUID, uuid4
 
@@ -11,6 +12,13 @@ from modules.courses.models import CMIEnrollment
 from modules.users.models import User
 
 from .models import CMICourse
+
+
+@dataclass
+class CourseDTO:
+    title: str
+    description: str
+    file_path: str
 
 
 class CMICourseService:
@@ -36,7 +44,7 @@ class CMICourseService:
 
         return course
 
-    async def create(self, data: dict) -> CMICourse:
+    async def create(self, data: CourseDTO) -> CMICourse:
         """Create a CMI5 Course
 
         Args:
@@ -48,9 +56,10 @@ class CMICourseService:
 
         course = CMICourse(
             id=uuid4(),
-            title=data.get("title"),
-            description=data.get("description"),
+            title=data.title,
+            description=data.description,
             organization_id="ebbc58b4db644e93bdfbe493534e847c",
+            file_link=data.file_path,
         )  # fake organization id
 
         self.session.add(course)

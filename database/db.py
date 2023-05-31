@@ -1,5 +1,4 @@
 import json
-from dataclasses import dataclass
 from typing import Any, NewType
 from uuid import UUID
 
@@ -7,20 +6,10 @@ from sqlalchemy import MetaData
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.pool.impl import AsyncAdaptedQueuePool
+from config import settings
 
 DBSession = NewType("DBSession", AsyncSession)
-
-
-@dataclass(frozen=True, slots=True)
-class Database:
-    name: str = "postgres"
-    host: str = "postgres"
-    username: str = "postgres"
-    password: str = "postgres"
-    port: int = 5432
-
-
-database = Database()
+database = settings.postgres_settings
 
 
 def json_serializer(obj: Any) -> str:

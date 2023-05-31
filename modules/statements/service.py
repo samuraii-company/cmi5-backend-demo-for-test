@@ -16,7 +16,7 @@ class CMIStatementService:
     def __init__(self, session: DBSession = Depends(get_session)):
         self.session = session
 
-    async def get_all(self) -> list[CMIStatement, None]:
+    async def get_all(self) -> list[CMIStatement]:
         objs = (
             (
                 await self.session.execute(

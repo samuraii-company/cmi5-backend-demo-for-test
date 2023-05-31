@@ -12,8 +12,7 @@ statement_router = APIRouter(tags=["statement"], prefix="/api/statement")
 
 
 @statement_router.post(
-    "",
-    response_model=CMIStatementRead,
+    "", response_model=CMIStatementRead, name="statements:create_statement"
 )
 async def create_statement(
     data: CMIStatementsCreate,
@@ -42,8 +41,7 @@ async def create_statement(
 
 
 @statement_router.get(
-    "/all",
-    response_model=list[CMIStatementRead],
+    "/all", response_model=list[CMIStatementRead], name="statements:get_all_statements"
 )
 async def get_all_statements(
     cmi_statement_service: CMIStatementService = Depends(CMIStatementService),
