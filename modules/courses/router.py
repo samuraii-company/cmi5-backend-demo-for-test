@@ -20,8 +20,7 @@ courses_router = APIRouter(tags=["courses"], prefix="/api/courses")
 
 
 @courses_router.post(
-    "",
-    response_model=CMICourseRead,
+    "", response_model=CMICourseRead, name="courses:create_cmi5_course"
 )
 async def create_cmi5_course(
     title: str = Body(..., description="Course Title"),
@@ -44,7 +43,9 @@ async def create_cmi5_course(
     return course
 
 
-@courses_router.get("/all", response_model=list[CMICoursesBase])
+@courses_router.get(
+    "/all", response_model=list[CMICoursesBase], name="courses:get_cmi5_all_courses"
+)
 async def get_cmi5_all_courses(
     cmi_course_service: CMICourseService = Depends(CMICourseService),
 ):
@@ -56,8 +57,7 @@ async def get_cmi5_all_courses(
 
 
 @courses_router.get(
-    "/{course_id}",
-    response_model=CMICourseRead,
+    "/{course_id}", response_model=CMICourseRead, name="courses:get_cmi5_course"
 )
 async def get_cmi5_course(
     course_id: UUID,
@@ -78,7 +78,7 @@ async def get_cmi5_course(
 
 @courses_router.post(
     "/enrollment",
-    name="cmi5:set_enrollment",
+    name="courses:set_enrollment",
     response_model=CMIEnrollementRead,
 )
 async def set_enrollment(

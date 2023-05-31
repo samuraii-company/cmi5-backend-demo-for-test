@@ -3,7 +3,7 @@ from uuid import UUID
 import pydantic
 
 from modules.users.schema import UserRead
-from settings.config import settings
+from config import settings
 from shared.utils import urljoin
 
 

@@ -8,7 +8,7 @@ from modules.users.services import UserService
 users_router = APIRouter(tags=["users"], prefix="/api/users")
 
 
-@users_router.post("", response_model=UserRead)
+@users_router.post("", response_model=UserRead, name="users:create_user")
 async def create_user(
     data: UserCreate,
     user_service: UserService = Depends(UserService),
@@ -25,7 +25,7 @@ async def create_user(
     return user
 
 
-@users_router.get("", response_model=list[UserRead])
+@users_router.get("", response_model=list[UserRead], name="users:get_all_users")
 async def get_all_users(
     user_service: UserService = Depends(UserService),
 ):
@@ -36,7 +36,7 @@ async def get_all_users(
     return users
 
 
-@users_router.get("/email/{email}", response_model=UserRead)
+@users_router.get("/email/{email}", response_model=UserRead, name="users:get_by_email")
 async def get_by_email(
     email: str,
     user_service: UserService = Depends(UserService),
@@ -51,7 +51,7 @@ async def get_by_email(
     return user
 
 
-@users_router.delete("{user_id}", response_model=UserRead)
+@users_router.delete("{user_id}", response_model=UserRead, name="users:delete_user")
 async def delete_user(
     user_id: UUID,
     user_service: UserService = Depends(UserService),

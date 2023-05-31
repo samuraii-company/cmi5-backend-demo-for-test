@@ -62,3 +62,6 @@ uvicorn==0.22.0
 virtualenv==20.23.0
 wrapt==1.15.0
 yarl==1.9.2
+Faker==18.9.0
+asgi-lifespan==2.1.0
+fixtures==4.1.0

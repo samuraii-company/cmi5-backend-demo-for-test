@@ -4,7 +4,7 @@ import io
 from uuid import uuid4
 
 from fastapi import UploadFile
-from settings.config import settings
+from config import settings
 
 from minio import Minio
 from shared.utils import urljoin
