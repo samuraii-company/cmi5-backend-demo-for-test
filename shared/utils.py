@@ -1,6 +1,15 @@
 # flake8: noqa
+import io
+from os import mkdir
 import re
+from secrets import token_urlsafe
+from shutil import rmtree
 from typing import Union
+import zipfile
+from os.path import join
+import time
+
+from fastapi import UploadFile
 
 Matchable = Union[dict, list, set, tuple]
 
@@ -92,3 +101,32 @@ def matches(obj: Matchable, sample: Matchable, any_order: bool = False) -> bool:
         return True
 
     return sample == obj
+
+
+def extract_zip(_zipfile: UploadFile) -> str:
+    """Extract zip archive
+
+    Args:
+        _zipfile (UploadFile): zip file
+
+    Returns:
+        str: extracted folder
+    """
+
+    tempdir = f"temp_{token_urlsafe(4)}"
+    filepath = join(tempdir, _zipfile.filename)
+    content = io.BytesIO(_zipfile.file.read())
+    mkdir(tempdir)
+    with open(filepath, "wb") as file:
+        while chunk := content.read():
+            file.write(chunk)
+    with zipfile.ZipFile(filepath) as zf:
+        zf.extractall(tempdir)
+    zf.close()
+
+    return tempdir
+
+
+def delete_folder(folder_path: str):
+    time.sleep(20)
+    rmtree(folder_path)

@@ -1,6 +1,14 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Body, Depends, File, HTTPException, UploadFile
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Body,
+    Depends,
+    File,
+    HTTPException,
+    UploadFile,
+)
 
 from modules.courses.schema import (
     CMICourseRead,
@@ -11,8 +19,10 @@ from modules.courses.schema import (
 from modules.courses.service import CMICourseService, CourseDTO
 from modules.users.services import UserService
 import logging
+from shared.utils import delete_folder, extract_zip
 from storage.storage import IStorage, LocalStorage
-
+from shutil import rmtree
+import os.path
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +33,7 @@ courses_router = APIRouter(tags=["courses"], prefix="/api/courses")
     "", response_model=CMICourseRead, name="courses:create_cmi5_course"
 )
 async def create_cmi5_course(
+    background_tasks: BackgroundTasks,
     title: str = Body(..., description="Course Title"),
     description: str = Body(..., description="Course Description"),
     file: UploadFile = File(...),
@@ -31,14 +42,42 @@ async def create_cmi5_course(
 ):
     """Create CMI5 Course"""
 
-    if file.content_type not in ("application/zip", "application/octet-stream"):
-        raise HTTPException(detail="upload zip archive", status_code=400)
+    content_type = ""
 
-    file_path = storage.save_course_file(file)
+    logger.debug(file.content_type)
+
+    if file.content_type in (
+        "application/zip",
+        "application/octet-stream",
+    ):
+        content_type = "zip"
+    elif file.content_type in (
+        "application/xml",
+        "text/xml",
+    ):
+        content_type = "xml"
+    else:
+        raise HTTPException(
+            detail="Uploading Failed: Not corrected file content type",
+            status_code=400,
+        )
+
+    folder_path = extract_zip(file)
+
+    if content_type == "zip" and not os.path.exists(f"{folder_path}/cmi5.xml"):
+        rmtree(folder_path)
+        raise HTTPException(
+            detail="Failed to retrieve course structure data from zip",
+            status_code=400,
+        )
+
+    file_path = storage.save_course_file(folder_path)
 
     data = CourseDTO(title=title, description=description, file_path=file_path)
 
     course = await cmi_course_service.create(data)
+
+    background_tasks.add_task(delete_folder, folder_path)
 
     return course
 

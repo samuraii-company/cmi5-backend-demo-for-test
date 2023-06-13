@@ -1,7 +1,6 @@
 from enum import StrEnum
+import os
 from typing import Protocol
-import io
-from uuid import uuid4
 
 from fastapi import UploadFile
 from config import settings
@@ -52,21 +51,23 @@ class LocalStorage:
         return urljoin(folder, filename)
 
     def _save(
-        self, file: UploadFile, folder: StorageTypeEnum, path_prefix: str | None = None
+        self, _filepath: str, folder: StorageTypeEnum, path_prefix: str | None = None
     ):
-        _file = io.BytesIO(file.file.read())
+        for root, _, files in os.walk(_filepath):
+            for file in files:
+                file_path = os.path.join(root, file)
+                folder_path_on_bucket = (
+                    os.path.join(folder.value, _filepath, path_prefix)
+                    if path_prefix
+                    else os.path.join(folder.value, _filepath)
+                )
+                object_name = os.path.join(
+                    folder_path_on_bucket,
+                    os.path.relpath(file_path, _filepath),
+                )
+                self.minio.fput_object(self._bucket_name, object_name, file_path)
 
-        file_path = self._get_path(f"{str(uuid4())}.zip", folder.value, path_prefix)
-        print(file_path)
-        self.minio.put_object(
-            self._bucket_name,
-            file_path,
-            data=_file,
-            content_type=file.content_type,
-            length=file.size,
-        )
-
-        return file_path
+        return folder_path_on_bucket
 
     def save_course_file(self, file: UploadFile, path_prefix: str | None = None) -> str:
         return self._save(file, StorageTypeEnum.courses, path_prefix)
