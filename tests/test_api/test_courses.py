@@ -7,7 +7,6 @@ from modules.courses.models import CMICourse, CMIEnrollment
 from modules.statements.models import CMIStatement
 from shared.utils import matches
 
-
 ARCHIVE_PATH = os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
     "../resources/scorm.zip",
@@ -103,11 +102,13 @@ class TestCourseAPI:
         assert response.status_code == 404
 
     async def test_create_course(self, api_app, client, mocker):
+        # INFO: not mockeing extract_zip and delete_folder, becouse need tests this functional
         with open(str(ARCHIVE_PATH), "rb") as f:
-            scorm_archive = {"file": io.BytesIO(f.read())}
+            fake_file = f.read()
+            scorm_archive = {"file": io.BytesIO(fake_file)}
 
         mocker.patch(
-            "storage.storage.LocalStorage.save_course_file",
+            "storage.storage.LocalStorage.save_course_folder",
             return_value=f"courses/{str(uuid4())}.zip",
         )
 

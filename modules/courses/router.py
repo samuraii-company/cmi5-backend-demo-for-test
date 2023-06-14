@@ -44,8 +44,6 @@ async def create_cmi5_course(
 
     content_type = ""
 
-    logger.debug(file.content_type)
-
     if file.content_type in (
         "application/zip",
         "application/octet-stream",
@@ -56,9 +54,14 @@ async def create_cmi5_course(
         "text/xml",
     ):
         content_type = "xml"
+        # INFO: Deprecated: we not support xml config files
+        raise HTTPException(
+            detail="Deprecated: just xml file not supported",
+            status_code=400,
+        )
     else:
         raise HTTPException(
-            detail="Uploading Failed: Not corrected file content type",
+            detail="Uploading Failed: Bad archive or file",
             status_code=400,
         )
 
@@ -67,13 +70,17 @@ async def create_cmi5_course(
     if content_type == "zip" and not os.path.exists(f"{folder_path}/cmi5.xml"):
         rmtree(folder_path)
         raise HTTPException(
-            detail="Failed to retrieve course structure data from zip",
+            detail="Failed to retrieve course structure data from zip: not found cmi5.xml file",
             status_code=400,
         )
 
-    file_path = storage.save_course_file(folder_path)
+    file_path = storage.save_course_folder(folder_path)
 
-    data = CourseDTO(title=title, description=description, file_path=file_path)
+    data = CourseDTO(
+        title=title,
+        description=description,
+        file_path=os.path.join(file_path, "res/index.html"),
+    )
 
     course = await cmi_course_service.create(data)
 
