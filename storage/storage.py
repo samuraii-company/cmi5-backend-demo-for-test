@@ -1,13 +1,13 @@
 from enum import StrEnum
+import os
 from typing import Protocol
-import io
-from uuid import uuid4
 
 from fastapi import UploadFile
 from config import settings
 
 from minio import Minio
 from shared.utils import urljoin
+from storage.utils import get_content_type
 
 
 class StorageTypeEnum(StrEnum):
@@ -20,7 +20,7 @@ class IStorage(Protocol):
     def _save(self, file: UploadFile, path_prefix: str | None = None):
         ...
 
-    def save_course_file(self, file: UploadFile, path_prefix: str | None = None):
+    def save_course_folder(self, file: UploadFile, path_prefix: str | None = None):
         ...
 
     def save_test_file(self, file: UploadFile, path_prefix: str | None = None):
@@ -52,24 +52,37 @@ class LocalStorage:
         return urljoin(folder, filename)
 
     def _save(
-        self, file: UploadFile, folder: StorageTypeEnum, path_prefix: str | None = None
+        self, _filepath: str, folder: StorageTypeEnum, path_prefix: str | None = None
     ):
-        _file = io.BytesIO(file.file.read())
-
-        file_path = self._get_path(f"{str(uuid4())}.zip", folder.value, path_prefix)
-        print(file_path)
-        self.minio.put_object(
-            self._bucket_name,
-            file_path,
-            data=_file,
-            content_type=file.content_type,
-            length=file.size,
+        folder_path_on_bucket = (
+            os.path.join(folder.value, _filepath, path_prefix)
+            if path_prefix
+            else os.path.join(folder.value, _filepath)
         )
 
-        return file_path
+        for root, _, files in os.walk(_filepath):
+            for file in files:
+                file_path = os.path.join(root, file)
+                object_name = os.path.join(
+                    folder_path_on_bucket,
+                    os.path.relpath(file_path, _filepath),
+                )
+                content_type = get_content_type(object_name)
+                file_size = os.stat(file_path).st_size
 
-    def save_course_file(self, file: UploadFile, path_prefix: str | None = None) -> str:
-        return self._save(file, StorageTypeEnum.courses, path_prefix)
+                with open(file_path, "rb") as file_data:
+                    self.minio.put_object(
+                        self._bucket_name,
+                        object_name,
+                        file_data,
+                        length=file_size,
+                        content_type=content_type,
+                    )
+
+        return folder_path_on_bucket
+
+    def save_course_folder(self, file_path: str, path_prefix: str | None = None) -> str:
+        return self._save(file_path, StorageTypeEnum.courses, path_prefix)
 
     def save_test_file(self, file: UploadFile, path_prefix: str | None = None):
         ...

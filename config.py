@@ -47,7 +47,7 @@ class Settings(BaseSettings):
     local_storage_dir = os.path.join(root_dir, "secure_t")
     environment: str = "local"
     static_url: str = "http://127.0.0.1:5000"
-    storage_url: str = "http://127.0.0.1:9000"
+    storage_url: str = "http://127.0.0.1"
     tag: str = "local"
     postgres_settings: PostgresSettings = PostgresSettings()
     s3_settings: S3Settings = S3Settings()
