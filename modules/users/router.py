@@ -1,6 +1,8 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Response
+from modules.courses.service import CMICourseService
+from modules.statements.schema import CMICourseStatementLite, CMIFullUserDataRead
 
 from modules.users.schema import UserCreate, UserRead
 from modules.users.services import UserService
@@ -36,19 +38,33 @@ async def get_all_users(
     return users
 
 
-@users_router.get("/email/{email}", response_model=UserRead, name="users:get_by_email")
-async def get_by_email(
-    email: str,
+@users_router.get(
+    "/{user_id}", response_model=CMIFullUserDataRead, name="users:get_by_id"
+)
+async def get_by_id(
+    user_id: UUID,
     user_service: UserService = Depends(UserService),
+    course_service: CMICourseService = Depends(CMICourseService),
 ):
-    """Get user by email"""
+    """Get user by id"""
 
-    user = await user_service.get_by_email(email)
+    user = await user_service.get_by_id(user_id)
 
     if not user:
         raise HTTPException(detail="User not found", status_code=404)
 
-    return user
+    courses = await course_service.get_by_user_id(user.id)
+
+    match courses:
+        case None:
+            data = list()
+        case _:
+            data = list(CMICourseStatementLite(course=course) for course in courses)
+
+    return CMIFullUserDataRead(
+        user_id=user.id,
+        data=data,
+    )
 
 
 @users_router.delete("{user_id}", response_model=UserRead, name="users:delete_user")

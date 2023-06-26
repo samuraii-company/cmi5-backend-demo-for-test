@@ -31,6 +31,14 @@ class CMICourseService:
         self.session = session
 
     async def get_by_id(self, course_id: UUID) -> CMICourse | None:
+        """Get course by id
+
+        Args:
+            course_id (UUID): course id
+
+        Returns:
+            CMICourse | None: course instance or none
+        """
         course = (
             await self.session.execute(
                 select(self.model).where(
@@ -43,6 +51,32 @@ class CMICourseService:
         ).scalar()
 
         return course
+
+    async def get_by_user_id(self, user_id: UUID) -> list[CMICourse | None]:
+        """Get course by user id
+
+        Args:
+            user_id (UUID): user id
+
+        Returns:
+            list[CMICourse | None]: list courses or empty list
+        """
+        courses = (
+            (
+                await self.session.execute(
+                    select(self.model)
+                    .join(CMIEnrollment, self.model.id == CMIEnrollment.course_id)
+                    .where(
+                        CMIEnrollment.user_id == user_id,
+                        self.model.deleted_at.is_(None),
+                    )
+                )
+            )
+            .scalars()
+            .all()
+        )
+
+        return courses
 
     async def create(self, data: CourseDTO) -> CMICourse:
         """Create a CMI5 Course
@@ -181,6 +215,14 @@ class CMICourseService:
         return courses
 
     async def _get_enrollment_by_id(self, enrollment_id: UUID) -> CMIEnrollment | None:
+        """Get enrollment by id
+
+        Args:
+            enrollment_id (UUID): enrollment id
+
+        Returns:
+            CMIEnrollment | None: enrollemnt instance or none
+        """
         return (
             await self.session.execute(
                 select(CMIEnrollment)

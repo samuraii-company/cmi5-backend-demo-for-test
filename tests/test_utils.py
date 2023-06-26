@@ -1,7 +1,8 @@
 import io
+from shutil import rmtree
 
 from fastapi import UploadFile
-from shared.utils import extract_zip, delete_folder
+from shared.utils import extract_zip
 from storage.utils import get_content_type
 import os
 
@@ -18,7 +19,7 @@ def test_extract_zip():
     # need real creating folder for test, need some waining:<
     ARCHIVE_PATH = os.path.join(
         os.path.dirname(os.path.realpath(__file__)),
-        "../resources/scorm.zip",
+        "./resources/scorm.zip",
     )
 
     with open(str(ARCHIVE_PATH), "rb") as f:
@@ -26,4 +27,5 @@ def test_extract_zip():
         file = UploadFile(file=scorm_archive, filename="string")
         path = extract_zip(file)
         assert path
-        delete_folder(path)
+        # delete local folder after test
+        rmtree(path)

@@ -295,3 +295,31 @@ class TestCourseAPI:
         )
 
         assert response.status_code == 404
+
+    async def test_get_statement(self, db_session, api_app, client):
+        async with db_session() as session:
+            session.add_all(
+                (
+                    self.user,
+                    self.course,
+                    self.enrollment,
+                    self.statements,
+                )
+            )
+            await session.commit()
+
+        response = await client.get(
+            api_app.url_path_for(
+                "statements:get_statement",
+                course_id=str(self.course.id),
+                user_id=str(self.user.id),
+            ),
+        )
+        assert response.status_code == 200
+        assert matches(
+            response.json(),
+            {
+                "id": ...,
+                "statements": {"status": "ok"},
+            },
+        )

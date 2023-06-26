@@ -2,7 +2,6 @@ from uuid import UUID
 
 from fastapi import (
     APIRouter,
-    BackgroundTasks,
     Body,
     Depends,
     File,
@@ -19,7 +18,7 @@ from modules.courses.schema import (
 from modules.courses.service import CMICourseService, CourseDTO
 from modules.users.services import UserService
 import logging
-from shared.utils import delete_folder, extract_zip
+from shared.utils import extract_zip
 from storage.storage import IStorage, LocalStorage
 from shutil import rmtree
 import os.path
@@ -33,7 +32,6 @@ courses_router = APIRouter(tags=["courses"], prefix="/api/courses")
     "", response_model=CMICourseRead, name="courses:create_cmi5_course"
 )
 async def create_cmi5_course(
-    background_tasks: BackgroundTasks,
     title: str = Body(..., description="Course Title"),
     description: str = Body(..., description="Course Description"),
     file: UploadFile = File(...),
@@ -49,16 +47,6 @@ async def create_cmi5_course(
         "application/octet-stream",
     ):
         content_type = "zip"
-    elif file.content_type in (
-        "application/xml",
-        "text/xml",
-    ):
-        content_type = "xml"
-        # INFO: Deprecated: we not support xml config files
-        raise HTTPException(
-            detail="Deprecated: just xml file not supported",
-            status_code=400,
-        )
     else:
         raise HTTPException(
             detail="Uploading Failed: Bad archive or file",
@@ -83,9 +71,8 @@ async def create_cmi5_course(
     )
 
     course = await cmi_course_service.create(data)
-
-    background_tasks.add_task(delete_folder, folder_path)
-
+    # delete local folder after uploading scorm course on s3 bucket
+    rmtree(folder_path)
     return course
 
 
@@ -109,7 +96,7 @@ async def get_cmi5_course(
     course_id: UUID,
     cmi_course_service: CMICourseService = Depends(CMICourseService),
 ):
-    """Get course detail with users"""
+    """Get course with users by this course"""
 
     course = await cmi_course_service.get_by_id(course_id)
 
@@ -132,7 +119,7 @@ async def set_enrollment(
     user_service: UserService = Depends(UserService),
     cmi_course_service: CMICourseService = Depends(CMICourseService),
 ):
-    """Set Course on user"""
+    """Assign course on user"""
 
     course = await cmi_course_service.get_by_id(data.course_id)
 

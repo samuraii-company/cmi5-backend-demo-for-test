@@ -18,6 +18,14 @@ class UserService:
         self.session = session
 
     async def create(self, data: dict) -> User:
+        """Create a new user
+
+        Args:
+            data (dict): user data
+
+        Returns:
+            User: yser instance
+        """
         user = User(
             id=uuid4(),
             email=data.get("email"),
@@ -29,6 +37,14 @@ class UserService:
         return user
 
     async def get_by_email(self, email: str) -> User | None:
+        """Get user by email: Deprecated method
+
+        Args:
+            email (str): email
+
+        Returns:
+            User | None: user instance or none
+        """
         user = (
             await self.session.execute(
                 select(self.model).where(
@@ -43,6 +59,11 @@ class UserService:
         return user
 
     async def delete(self, user: User) -> None:
+        """Delete user
+
+        Args:
+            user (User): user instance
+        """
         query = (
             update(self.model)
             .where(
@@ -57,6 +78,11 @@ class UserService:
         await self.session.execute(query)
 
     async def get_all(self) -> list[User | None]:
+        """Get all users
+
+        Returns:
+            list[User | None]: list users or empty list
+        """
         user = (
             (
                 await self.session.execute(
@@ -70,6 +96,14 @@ class UserService:
         return user
 
     async def get_by_id(self, user_id: UUID) -> User | None:
+        """Get user by id
+
+        Args:
+            user_id (UUID): user id
+
+        Returns:
+            User | None: user instance or none
+        """
         user = (
             await self.session.execute(
                 select(self.model).where(

@@ -41,3 +41,8 @@ class CMIEnrollementRead(pydantic.BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class CMIUserCourseFull(pydantic.BaseModel):
+    user_id: UUID
+    courses: list[CMICoursesBase]

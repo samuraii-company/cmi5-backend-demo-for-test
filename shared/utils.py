@@ -3,11 +3,9 @@ import io
 from os import mkdir
 import re
 from secrets import token_urlsafe
-from shutil import rmtree
 from typing import Union
 import zipfile
 from os.path import join
-import time
 
 from fastapi import UploadFile
 
@@ -122,11 +120,5 @@ def extract_zip(_zipfile: UploadFile) -> str:
             file.write(chunk)
     with zipfile.ZipFile(filepath) as zf:
         zf.extractall(tempdir)
-    zf.close()
 
     return tempdir
-
-
-def delete_folder(folder_path: str):
-    time.sleep(20)
-    rmtree(folder_path)
