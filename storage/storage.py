@@ -12,8 +12,6 @@ from storage.utils import get_content_type
 
 class StorageTypeEnum(StrEnum):
     courses: str = "courses"
-    tests: str = "tests"
-    player: str = "player"
 
 
 class IStorage(Protocol):
