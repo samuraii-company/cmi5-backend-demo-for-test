@@ -7,12 +7,13 @@ from modules.users.router import users_router
 import logging
 from app import __version__
 
+
 logger = logging.getLogger(__name__)
 
 
 def create_app() -> FastAPI:
     app: FastAPI = FastAPI(
-        title="Secure-t CMI5 Backend API",
+        title="CMI5 Backend API",
         version=__version__,
     )
 

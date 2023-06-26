@@ -27,3 +27,18 @@ class CMIStatementRead(pydantic.BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class CMICourseStatementLite(pydantic.BaseModel):
+    course: CMICoursesBase
+
+    class Config:
+        orm_mode = True
+
+
+class CMIFullUserDataRead(pydantic.BaseModel):
+    user_id: UUID
+    data: list[CMICourseStatementLite | None] = []
+
+    class Config:
+        orm_mode = True

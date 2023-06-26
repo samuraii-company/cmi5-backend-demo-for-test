@@ -1,7 +1,12 @@
+from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 
 from modules.courses.service import CMICourseService
-from modules.statements.schema import CMIStatementRead, CMIStatementsCreate
+from modules.statements.schema import (
+    CMIStatementBase,
+    CMIStatementRead,
+    CMIStatementsCreate,
+)
 from modules.statements.service import CMIStatementService
 import logging
 
@@ -55,3 +60,23 @@ async def get_all_statements(
     objs = await cmi_statement_service.get_full_objs(statements)
     logger.info(objs)
     return objs
+
+
+@statement_router.get(
+    "/{course_id}/{user_id}",
+    response_model=CMIStatementBase,
+    name="statements:get_statement",
+)
+async def get_statement(
+    course_id: UUID,
+    user_id: UUID,
+    statement_service: CMIStatementService = Depends(CMIStatementService),
+):
+    """Get statement by user for course"""
+
+    statement = await statement_service.get_statement(course_id, user_id)
+
+    if not statement:
+        raise HTTPException(detail="Statement not found", status_code=404)
+
+    return statement
