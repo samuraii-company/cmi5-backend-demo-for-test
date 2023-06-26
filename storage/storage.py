@@ -20,13 +20,7 @@ class IStorage(Protocol):
     def _save(self, file: UploadFile, path_prefix: str | None = None):
         ...
 
-    def save_course_folder(self, file: UploadFile, path_prefix: str | None = None):
-        ...
-
-    def save_test_file(self, file: UploadFile, path_prefix: str | None = None):
-        ...
-
-    def save_player_file(self, file: UploadFile, path_prefix: str | None = None):
+    def save_course_folder(self, file_path: str, path_prefix: str | None = None):
         ...
 
 
@@ -83,9 +77,3 @@ class LocalStorage:
 
     def save_course_folder(self, file_path: str, path_prefix: str | None = None) -> str:
         return self._save(file_path, StorageTypeEnum.courses, path_prefix)
-
-    def save_test_file(self, file: UploadFile, path_prefix: str | None = None):
-        ...
-
-    def save_player_file(self, file: UploadFile, path_prefix: str | None = None):
-        ...
