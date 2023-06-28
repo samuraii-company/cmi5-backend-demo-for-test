@@ -120,9 +120,7 @@ async def set_enrollment(
     cmi_course_service: CMICourseService = Depends(CMICourseService),
 ):
     """Assign course on user"""
-
     course = await cmi_course_service.get_by_id(data.course_id)
-
     if not course:
         raise HTTPException(detail="Курс не найден", status_code=404)
 
