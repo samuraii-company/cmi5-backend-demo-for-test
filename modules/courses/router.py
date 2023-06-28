@@ -45,6 +45,7 @@ async def create_cmi5_course(
     if file.content_type in (
         "application/zip",
         "application/octet-stream",
+        "application/x-zip-compressed",
     ):
         content_type = "zip"
     else:
