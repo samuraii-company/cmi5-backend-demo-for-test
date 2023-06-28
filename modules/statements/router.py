@@ -1,5 +1,6 @@
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
+from modules.courses.schema import CMICoursesBase
 
 from modules.courses.service import CMICourseService
 from modules.statements.schema import (
@@ -8,10 +9,8 @@ from modules.statements.schema import (
     CMIStatementsCreate,
 )
 from modules.statements.service import CMIStatementService
-import logging
 
-
-logger = logging.getLogger(__name__)
+from modules.users.schema import UserRead
 
 statement_router = APIRouter(tags=["statement"], prefix="/api/statement")
 
@@ -35,14 +34,25 @@ async def create_statement(
         raise HTTPException(
             detail="Can't get enrollment by course and user", status_code=404
         )
-
-    statement_obj = await cmi_statement_service.create(data.statement)
-
-    enrollment_obj = await cmi_statement_service.set_statement(
-        statement_obj, enrollment
-    )
-
-    return enrollment_obj
+    if enrollment.statement_id:
+        statement = await cmi_statement_service.update_statement(
+            enrollment.statement_id, data.statement
+        )
+        return CMIStatementRead(
+            course=CMICoursesBase.from_orm(enrollment.course),
+            user=UserRead.from_orm(enrollment.user),
+            statement=CMIStatementBase.from_orm(statement),
+        )
+    else:
+        statement_obj = await cmi_statement_service.create(data.statement)
+        enrollment_obj = await cmi_statement_service.set_statement(
+            statement_obj, enrollment
+        )
+        return CMIStatementRead(
+            course=CMICoursesBase.from_orm(enrollment_obj.course),
+            user=UserRead.from_orm(enrollment_obj.user),
+            statement=CMIStatementBase.from_orm(statement_obj),
+        )
 
 
 @statement_router.get(
@@ -58,7 +68,6 @@ async def get_all_statements(
         raise HTTPException(detail="Statements not found", status_code=404)
 
     objs = await cmi_statement_service.get_full_objs(statements)
-    logger.info(objs)
     return objs
 
 
