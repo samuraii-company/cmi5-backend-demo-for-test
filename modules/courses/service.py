@@ -168,12 +168,16 @@ class CMICourseService:
 
         enrollment = (
             await self.session.execute(
-                select(CMIEnrollment).where(
+                select(CMIEnrollment)
+                .where(
                     and_(
                         CMIEnrollment.course_id == course_id,
                         CMIEnrollment.user_id == user_id,
                     )
                 )
+                .options(selectinload(CMIEnrollment.statement))
+                .options(selectinload(CMIEnrollment.user))
+                .options(selectinload(CMIEnrollment.course))
             )
         ).scalar()
         return enrollment

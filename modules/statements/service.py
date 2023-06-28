@@ -1,7 +1,7 @@
 from uuid import UUID, uuid4
 
 from fastapi import Depends
-from sqlalchemy import and_, select
+from sqlalchemy import and_, select, update
 from sqlalchemy.orm import selectinload
 
 from database.db import DBSession
@@ -34,6 +34,24 @@ class CMIStatementService:
 
         return objs
 
+    async def get_by_id(self, statement_id: UUID) -> CMIStatement:
+        return (
+            await self.session.execute(
+                select(self.model).where(self.model.id == statement_id)
+            )
+        ).scalar()
+
+    async def update_statement(
+        self, statement_id: UUID, new_statement: dict
+    ) -> CMIStatement:
+        await self.session.execute(
+            update(self.model)
+            .where(self.model.id == statement_id)
+            .values(statements=new_statement)
+        )
+
+        return await self.get_by_id(statement_id)
+
     async def create(self, statement: dict) -> CMIStatement:
         """Create statement for User by course
 
@@ -65,8 +83,11 @@ class CMIStatementService:
         Returns:
             CMIEnrollment: Updated statement object
         """
-        enrollment.statement_id = statement.id
-        await self.session.commit()
+        await self.session.execute(
+            update(CMIEnrollment)
+            .where(CMIEnrollment.id == enrollment.id)
+            .values(statement_id=statement.id)
+        )
         obj = (
             await self.session.execute(
                 select(CMIEnrollment)
