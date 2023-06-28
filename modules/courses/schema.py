@@ -15,7 +15,7 @@ class CMICoursesBase(pydantic.BaseModel):
 
     @pydantic.validator("file_link")
     def validate_link(cls, v) -> str | None:
-        if v and not v.startswith(urljoin(settings.s3_settings.bucket_name)):
+        if v and not v.startswith(urljoin("/", settings.s3_settings.bucket_name)):
             return urljoin("/", settings.s3_settings.bucket_name, v)
         return v
 
