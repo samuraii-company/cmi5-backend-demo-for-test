@@ -32,7 +32,7 @@ services:
 
 
   minio:
-    image: samuraii143/local_bucket:latest
+    image: minio/minio:latest
     container_name: s3
     ports:
       - "9000:9000"
