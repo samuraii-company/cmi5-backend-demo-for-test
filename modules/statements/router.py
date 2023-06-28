@@ -64,7 +64,7 @@ async def get_all_statements(
 
 @statement_router.get(
     "/{course_id}/{user_id}",
-    response_model=CMIStatementBase,
+    response_model=CMIStatementBase | dict,
     name="statements:get_statement",
 )
 async def get_statement(
@@ -77,6 +77,6 @@ async def get_statement(
     statement = await statement_service.get_statement(course_id, user_id)
 
     if not statement:
-        raise HTTPException(detail="Statement not found", status_code=404)
+        return {}
 
     return statement
